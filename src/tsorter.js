@@ -5,7 +5,8 @@ var tsorter = (function()
     var sorterPrototype,
         addEvent,
         removeEvent,
-        hasEventListener = !!document.addEventListener;
+        hasEventListener = !!document.addEventListener,
+        isNumeric;
 
     if( !Object.create ){
         // Define Missing Function
@@ -34,6 +35,12 @@ var tsorter = (function()
         }
     };
 
+    isNumeric = function(text) {
+        if (/^\d+$/.test(text)) {
+            return 'numeric';
+        }
+    };
+
     sorterPrototype = {
 
         getCell: function(row)
@@ -52,7 +59,8 @@ var tsorter = (function()
         {   
             var that = this,
                 th = e.target,
-                parent = th.parentNode.tagName;
+                parent = th.parentNode.tagName,
+                sortType = th.getAttribute('data-tsorter') || isNumeric(that.trs[1].children[th.cellIndex].innerHTML);
 
             if (parent.toLowerCase() === 'th') {
                 return;
@@ -60,7 +68,7 @@ var tsorter = (function()
 
             // set the data retrieval function for this column 
             that.column = th.cellIndex;
-            that.get = that.getAccessor( th.getAttribute('data-tsorter') );
+            that.get = that.getAccessor(sortType);
 
             if( that.prevCol === that.column )
             {
@@ -75,7 +83,7 @@ var tsorter = (function()
                 if( that.prevCol !== -1 && that.ths[that.prevCol].className !== 'exc_cell'){
                     that.ths[that.prevCol].className = '';
                 }
-                that.quicksort(0, that.trs.length);
+                that.quicksort(1, that.trs.length);
             }
             that.prevCol = that.column;
         },
