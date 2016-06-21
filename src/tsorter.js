@@ -51,11 +51,12 @@ var tsorter = (function()
         sort: function( e )
         {   
             var that = this,
-                th = e.target;
+                th = e.target,
+                parent = th.parentNode.tagName;
 
-            // TODO: make sure target 'th' is not a child element of a <th> 
-            //  We can't use currentTarget because of backwards browser support
-            //  IE6,7,8 don't have it.
+            if (parent.toLowerCase() === 'th') {
+                return;
+            }
 
             // set the data retrieval function for this column 
             that.column = th.cellIndex;
@@ -149,7 +150,7 @@ var tsorter = (function()
                 i;
 
             for( i = 1; i < that.trs.length; i++ ) {
-                that.tbody.insertBefore( that.trs[i], that.trs[0] );
+                that.tbody.insertBefore( that.trs[i], that.trs[1] );
             }
         },
 
