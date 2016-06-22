@@ -169,7 +169,7 @@ var tsorter = (function()
                     };
                 case "numeric":
                     return function(row){  
-                        return parseFloat( that.getCell(row).firstChild.nodeValue.replace(/\D/g,''), 10 );
+                        return parseFloat( that.getCell(row).firstChild.nodeValue.replace(/\D/g,''));
                     };
                 default: /* Plain Text */
                     return function(row){  
