@@ -13,7 +13,17 @@ var tsorter = (function()
         hasEventListener = !!document.addEventListener,
         getDataType,
         isNumeric,
-        getLastChild;
+        getLastChild,
+        style,
+        downArrow = '▼',
+        upArrow = '▲';
+
+    // Add the styles.
+    style = document.createElement('style');
+    document.head.appendChild(style);
+
+    style.sheet.addRule('.tsorterSortable th.descend:after', 'content: "' + upArrow + '"');
+    style.sheet.addRule('.tsorterSortable th.ascend:after', 'content: "' + downArrow + '"');
 
     if( !Object.create ){
         // Define Missing Function
@@ -262,6 +272,11 @@ var tsorter = (function()
 
             if( typeof table === 'string' ){
                 table = document.getElementById(table);
+            }
+
+            // Add the sortable calss.
+            if (table.className.indexOf('tsorterSortable') <= -1) {
+                table.className += ' tsorterSortable';
             }
 
             that.table = table;
