@@ -6,7 +6,9 @@ var tsorter = (function()
         addEvent,
         removeEvent,
         hasEventListener = !!document.addEventListener,
-        isNumeric;
+        getDataType,
+        isNumeric,
+        getLastChild;
 
     if( !Object.create ){
         // Define Missing Function
@@ -35,10 +37,36 @@ var tsorter = (function()
         }
     };
 
+    getDataType = function(element, cell) {
+        var lastChild = getLastChild(element, cell),
+            lastChildValue = lastChild ? lastChild.innerHTML : '',
+            numeric;
+
+        if (lastChild) {
+            numeric = isNumeric(lastChildValue);
+
+            if (numeric) {
+                return numeric;
+            }
+        }
+    };
+
     isNumeric = function(text) {
         if (/^\d+$/.test(text)) {
             return 'numeric';
         }
+
+        return null;
+    };
+
+    getLastChild = function(element, cell) {
+        var child = element;
+
+        while (child.children.length > 0) {
+            child = child.children[cell];
+        }
+
+        return child;
     };
 
     sorterPrototype = {
@@ -60,7 +88,7 @@ var tsorter = (function()
             var that = this,
                 th = e.target,
                 parent = th.parentNode.tagName,
-                sortType = th.getAttribute('data-tsorter') || isNumeric(that.trs[1].children[th.cellIndex].innerHTML);
+                sortType = th.getAttribute('data-tsorter') || getDataType(that.trs[1], th.cellIndex);
 
             if (parent.toLowerCase() === 'th') {
                 return;
@@ -70,21 +98,11 @@ var tsorter = (function()
             that.column = th.cellIndex;
             that.get = that.getAccessor(sortType);
 
-            if( that.prevCol === that.column )
-            {
-                // if already sorted, reverse
-                th.className = th.className !== 'descend' ? 'descend' : 'ascend';
-                that.reverseTable();
-            }
-            else
-            {
-                // not sorted - call quicksort
-                th.className = 'descend';
-                if( that.prevCol !== -1 && that.ths[that.prevCol].className !== 'exc_cell'){
-                    that.ths[that.prevCol].className = '';
-                }
-                that.quicksort(1, that.trs.length);
-            }
+            th.className = th.className !== 'descend' ? 'descend' : 'ascend';
+            that.sortAscending = th.className === 'descend';
+
+            that.quicksort(1, that.trs.length);
+
             that.prevCol = that.column;
         },
         
@@ -147,20 +165,6 @@ var tsorter = (function()
                 }
             }
         },
-        
-        /* 
-         * REVERSE TABLE
-         * Reverses a table ordering
-         */
-        reverseTable: function()
-        {
-            var that = this,
-                i;
-
-            for( i = 1; i < that.trs.length; i++ ) {
-                that.tbody.insertBefore( that.trs[i], that.trs[1] );
-            }
-        },
 
         /*
          * QUICKSORT
@@ -173,33 +177,48 @@ var tsorter = (function()
                 that = this;
 
             if( hi <= lo+1 ){ return; }
-             
+
             if( (hi - lo) === 2 ) {
                 if(that.get(hi-1) > that.get(lo)) {
-                    that.exchange(hi-1, lo);   
+                    that.exchange(hi-1, lo);
                 }
                 return;
             }
-            
+
             i = lo + 1;
             j = hi - 1;
-            
+
             if( that.get(lo) > that.get( i) ){ that.exchange( i, lo); }
             if( that.get( j) > that.get(lo) ){ that.exchange(lo,  j); }
             if( that.get(lo) > that.get( i) ){ that.exchange( i, lo); }
-            
+
             pivot = that.get(lo);
-            
+
             while(true) {
-                j--;
-                while(pivot > that.get(j)){ j--; }
-                i++;
-                while(that.get(i) > pivot){ i++; }
+                if (that.sortAscending) {
+                    while (pivot > that.get(j)) { j--; }
+                    while (that.get(i) > pivot) { i++; }
+                } else {
+                    while (pivot < that.get(j)) { j--; }
+                    while (that.get(i) < pivot) { i++; }
+                }
+
                 if(j <= i){ break; }
-                that.exchange(i, j);
+
+                // JSLint is forcing '===', but that doesn't work with strings.
+                if (that.get(i) > that.get(j) || that.get(i) < that.get(j)) {
+                    that.exchange(i, j);
+                }
+
+                i++;
+                j--;
             }
-            that.exchange(lo, j);
-            
+
+            // JSLint is forcing '===', but that doesn't work with strings.
+            if (that.get(lo) > that.get(j) || that.get(lo) < that.get(j)) {
+                that.exchange(lo, j);
+            }
+
             if((j-lo) < (hi-j)) {
                 that.quicksort(lo, j);
                 that.quicksort(j+1, hi);
