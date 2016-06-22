@@ -269,6 +269,9 @@ var tsorter = (function()
 
             for( i = 0; i < that.ths.length; i++ ) {
                 addEvent( that.ths[i], 'click', that.boundSort );
+
+                // Make the cursor a pointer.
+                that.ths[i].style.cursor = 'pointer';
             }
         },
 
