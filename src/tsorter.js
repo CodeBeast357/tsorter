@@ -99,7 +99,8 @@ var tsorter = (function()
                 th = e.target,
                 parent = th.parentNode.tagName,
                 sortType = th.getAttribute('data-tsorter') || getDataType(that.trs[1], th.cellIndex),
-                hasClassList = !!document.body.classList;
+                hasClassList = !!document.body.classList,
+                classes;
 
             if (parent.toLowerCase() === 'th') {
                 return;
@@ -110,29 +111,43 @@ var tsorter = (function()
             that.get = that.getAccessor(sortType);
 
             if (hasClassList) {
-                if (th.classList.contains('descend')) {
-                    th.classList.add('ascend');
-                    th.classList.remove('descend');
+                classes = th.classList;
+
+                if (classes.contains('descend')) {
+                    classes.add('ascend');
+                    classes.remove('descend');
+
+                    that.sortAscending = true;
                 }
-                else if (th.classList.contains('ascend'))
+                else if (classes.contains('ascend'))
                 {
-                    th.classList.remove('ascend');
-                    th.classList.add('descend');
+                    classes.remove('ascend');
+                    classes.add('descend');
+
+                    that.sortAscending = false;
                 }
                 else {
-                    th.classList.add('descend');
+                    classes.add('descend');
+
+                    that.sortAscending = false;
                 }
             } else {
-                if (th.className.split(' ').indexOf('descend') > -1) {
+                classes = th.className.split(' ');
+
+                if (classes.indexOf('descend') > -1) {
                     th.className = th.className.replace('descend', 'ascend');
-                } else if (th.className.split(' ').indexOf('ascend') > -1) {
+
+                    that.sortAscending = true;
+                } else if (classes.indexOf('ascend') > -1) {
                     th.className = th.className.replace('ascend', 'descend');
+
+                    that.sortAscending = false;
                 } else {
                     th.className += ' descend';
+
+                    that.sortAscending = false;
                 }
             }
-
-            that.sortAscending = th.className.split(' ').indexOf('descend') > -1;
 
             that.quicksort(1, that.trs.length);
 
