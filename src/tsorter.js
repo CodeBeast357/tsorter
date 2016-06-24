@@ -17,8 +17,8 @@ var tsorter = (function()
     style = document.createElement('style');
     document.head.appendChild(style);
 
-    style.sheet.addRule('.tsorterSortable th.descend:after', 'content: "' + upArrow + '"');
-    style.sheet.addRule('.tsorterSortable th.ascend:after', 'content: "' + downArrow + '"');
+    style.sheet.addRule('.tsorterSortable th.descend:after', 'content: " ' + upArrow + '"');
+    style.sheet.addRule('.tsorterSortable th.ascend:after', 'content: " ' + downArrow + '"');
 
     if( !Object.create ){
         // Define Missing Function
@@ -122,6 +122,13 @@ var tsorter = (function()
                 else {
                     th.classList.add('descend');
                 }
+
+                // Cleanup the previous column.
+                if (that.prevCol !== -1 && that.prevCol !== that.column)
+                {
+                    that.ths[that.prevCol].classList.remove('ascend');
+                    that.ths[that.prevCol].classList.remove('descend');
+                }
             } else {
                 if (th.className.split(' ').indexOf('descend') > -1) {
                     th.className = th.className.replace('descend', 'ascend');
@@ -130,11 +137,18 @@ var tsorter = (function()
                 } else {
                     th.className += ' descend';
                 }
+
+                // Cleanup the previous column.
+                if (that.prevCol !== -1 && that.prevCol !== that.column)
+                {
+                    that.ths[that.prevCol].className.replace('ascend', '');
+                    that.ths[that.prevCol].className.replace('descend', '');
+                }
             }
 
             that.sortAscending = th.className.split(' ').indexOf('descend') > -1;
 
-            that.quicksort(1, that.trs.length);
+            that.quicksort(0, that.trs.length);
 
             that.prevCol = that.column;
         },
@@ -263,7 +277,9 @@ var tsorter = (function()
 
         init: function( table, initialSortedColumn, customDataAccessors ){
             var that = this,
-                i;
+                i,
+                sortType,
+                th;
 
             if( typeof table === 'string' ){
                 table = document.getElementById(table);
@@ -287,6 +303,22 @@ var tsorter = (function()
 
                 // Make the cursor a pointer.
                 that.ths[i].style.cursor = 'pointer';
+            }
+
+            // Add the ascending arrow to the initially sorted column (if applicable).
+            if (initialSortedColumn !== undefined && that.ths.length >= initialSortedColumn) {
+                that.ths[initialSortedColumn].className += ' ascend';
+
+                th = that.ths[initialSortedColumn];
+                sortType = th.getAttribute('data-tsorter') || getDataType(that.trs[1], th.cellIndex);
+
+                // set the data retrieval function for this column
+                that.column = th.cellIndex;
+                that.get = that.getAccessor(sortType);
+
+                that.quicksort(1, that.ths.length);
+
+                that.prevCol = that.column;
             }
         },
 
