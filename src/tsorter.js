@@ -72,7 +72,7 @@ var tsorter = (function()
     getLastChild = function(element, cell) {
         var child = element;
 
-        while (child.children.length > 0) {
+        while (child.children && child.children.length > 0) {
             child = child.children[cell];
         }
 
@@ -163,7 +163,7 @@ var tsorter = (function()
                 }
             }
 
-            that.quicksort(1, that.trs.length);
+            that.quicksort(0, that.trs.length);
 
             that.prevCol = that.column;
         },

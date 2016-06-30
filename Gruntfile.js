@@ -7,6 +7,8 @@ module.exports = function( grunt )
         ' * <%= pkg.name %> <%= pkg.version %> - Copyright <%= grunt.template.today("yyyy") %> Terrill Dent, http://terrill.ca\n' +
         ' * <%= pkg.description %>\n' +
         ' * <%= pkg.license %>\n' +
+        ' * \n' +
+        ' * Updated by Harrison Kelly.\n' +
         ' */\n',
 
       sourceDir = 'src/',

@@ -2,6 +2,8 @@
  * tsorter 2.0.0 - Copyright 2016 Terrill Dent, http://terrill.ca
  * JavaScript HTML Table Sorter
  * Released under MIT license, http://terrill.ca/sorting/tsorter/LICENSE
+ * 
+ * Updated by Harrison Kelly.
  */
 var tsorter = (function()
 {
@@ -77,7 +79,7 @@ var tsorter = (function()
     getLastChild = function(element, cell) {
         var child = element;
 
-        while (child.children.length > 0) {
+        while (child.children && child.children.length > 0) {
             child = child.children[cell];
         }
 
@@ -104,7 +106,8 @@ var tsorter = (function()
                 th = e.target,
                 parent = th.parentNode.tagName,
                 sortType = th.getAttribute('data-tsorter') || getDataType(that.trs[1], th.cellIndex),
-                hasClassList = !!document.body.classList;
+                hasClassList = !!document.body.classList,
+                classes;
 
             if (parent.toLowerCase() === 'th') {
                 return;
@@ -115,17 +118,25 @@ var tsorter = (function()
             that.get = that.getAccessor(sortType);
 
             if (hasClassList) {
-                if (th.classList.contains('descend')) {
-                    th.classList.add('ascend');
-                    th.classList.remove('descend');
+                classes = th.classList;
+
+                if (classes.contains('descend')) {
+                    classes.add('ascend');
+                    classes.remove('descend');
+
+                    that.sortAscending = true;
                 }
-                else if (th.classList.contains('ascend'))
+                else if (classes.contains('ascend'))
                 {
-                    th.classList.remove('ascend');
-                    th.classList.add('descend');
+                    classes.remove('ascend');
+                    classes.add('descend');
+
+                    that.sortAscending = false;
                 }
                 else {
-                    th.classList.add('descend');
+                    classes.add('descend');
+
+                    that.sortAscending = false;
                 }
 
                 // Cleanup the previous column.
@@ -135,12 +146,20 @@ var tsorter = (function()
                     that.ths[that.prevCol].classList.remove('descend');
                 }
             } else {
-                if (th.className.split(' ').indexOf('descend') > -1) {
+                classes = th.className.split(' ');
+
+                if (classes.indexOf('descend') > -1) {
                     th.className = th.className.replace('descend', 'ascend');
-                } else if (th.className.split(' ').indexOf('ascend') > -1) {
+
+                    that.sortAscending = true;
+                } else if (classes.indexOf('ascend') > -1) {
                     th.className = th.className.replace('ascend', 'descend');
+
+                    that.sortAscending = false;
                 } else {
                     th.className += ' descend';
+
+                    that.sortAscending = false;
                 }
 
                 // Cleanup the previous column.
@@ -150,8 +169,6 @@ var tsorter = (function()
                     that.ths[that.prevCol].className.replace('descend', '');
                 }
             }
-
-            that.sortAscending = th.className.split(' ').indexOf('descend') > -1;
 
             that.quicksort(0, that.trs.length);
 
