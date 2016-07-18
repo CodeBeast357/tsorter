@@ -24,8 +24,8 @@ var tsorter = (function()
     style = document.createElement('style');
     document.head.appendChild(style);
 
-    style.sheet.addRule('.tsorterSortable th.descend:after', 'content: " ' + upArrow + '"');
-    style.sheet.addRule('.tsorterSortable th.ascend:after', 'content: " ' + downArrow + '"');
+    style.sheet.insertRule('.tsorterSortable th.descend:after { content: " ' + upArrow + '" }', 0);
+    style.sheet.insertRule('.tsorterSortable th.ascend:after { content: " ' + downArrow + '" }', 0);
 
     if( !Object.create ){
         // Define Missing Function
