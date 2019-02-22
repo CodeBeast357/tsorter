@@ -112,8 +112,10 @@ var tsorter = (function()
             }
 
             // set the data retrieval function for this column 
-            that.column = th.cellIndex;
+            that.column = that.getHeaderIndex( that.table, th );
             that.get = that.getAccessor(sortType);
+            console.log("Sorting by column number " + that.column);
+
 
             if (hasClassList) {
                 classes = th.classList;
@@ -294,6 +296,18 @@ var tsorter = (function()
             }
         },
 
+        getHeaderIndex: function( table, th ){
+            var ths = table.tHead.getElementsByTagName("th");
+            var index = 0;
+            for( var i = 0 ; i < ths.length ; i++ ){
+                var headerCell = ths[i];
+                if( headerCell.innerHTML === th.innerHTML ){
+                    return index;
+                }
+                index += headerCell.colSpan;
+            }
+        },
+
         readHeaders: function( table ){
             var ths = table.tHead.getElementsByTagName("th");
             var headers = [];
@@ -303,6 +317,7 @@ var tsorter = (function()
                 for( var j = 0; j<th.colSpan; j++ ){
                     headers[index] = th;
                     index++;
+                    console.log("Adding a header at index " + index + " for header " + th.innerHTML);
                 }
             }
             return headers;
