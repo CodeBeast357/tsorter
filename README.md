@@ -1,4 +1,4 @@
-#tsorter
+# tsorter
 
 
 JavaScript Table Sorter using in-place QuickSort.
@@ -12,7 +12,7 @@ Provide the table ID and the initially sorted column (optional):
  var sorter = tsorter.create( tableID, initialSortColumn );
 ```
 
-##Specifying Data Types
+## Specifying Data Types
 
 Different data types require different comparisons. Numbers in particular must be compared as numbers and not strings. To aid the script we can hint at the data type by specifying a `data-tsorter` attribute on the table header cell for each column. 
 
@@ -28,7 +28,7 @@ Different data types require different comparisons. Numbers in particular must b
 
 If the `data-tsorter` attribute is omitted it will default to string comparison. 
 
-##Built in Data Types
+## Built in Data Types
 
 | type | description  |
 |-----|---|
@@ -37,7 +37,7 @@ If the `data-tsorter` attribute is omitted it will default to string comparison.
 | input | Parses an input tag's value inside the table cell |
 | default | by default the textContent of the table cell is used and compared as text |
 
-##Custom Data Accessor
+## Custom Data Accessor
 
 It is possible to define your own data accessors. This is particularly useful when there is custom HTML inside a table cell. 
 
