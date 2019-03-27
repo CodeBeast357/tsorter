@@ -336,6 +336,10 @@ var tsorter = (function()
                 table = document.getElementById(table);
             }
 
+            if( !table || table == null ){
+                return;
+            }
+
             // Add the sortable calss.
             if (table.className.indexOf('tsorterSortable') <= -1) {
                 table.className += ' tsorterSortable';
