@@ -5,7 +5,20 @@ var tsorter = (function()
     var sorterPrototype,
         addEvent,
         removeEvent,
-        hasEventListener = !!document.addEventListener;
+        hasEventListener = !!document.addEventListener,
+        getDataType,
+        isNumeric,
+        getLastChild,
+        style,
+        downArrow = '▼',
+        upArrow = '▲';
+
+    // Add the styles.
+    style = document.createElement('style');
+    document.head.appendChild(style);
+
+    style.sheet.insertRule('.tsorterSortable th.descend:after { content: " ' + upArrow + '" }', 0);
+    style.sheet.insertRule('.tsorterSortable th.ascend:after { content: " ' + downArrow + '" }', 0);
 
     if( !Object.create ){
         // Define Missing Function
@@ -34,6 +47,38 @@ var tsorter = (function()
         }
     };
 
+    getDataType = function(element, cell) {
+        var lastChild = getLastChild(element, cell),
+            lastChildValue = lastChild ? lastChild.innerHTML : '',
+            numeric;
+
+        if (lastChild) {
+            numeric = isNumeric(lastChildValue);
+
+            if (numeric) {
+                return numeric;
+            }
+        }
+    };
+
+    isNumeric = function(text) {
+        if (/^\d+$/.test(text)) {
+            return 'numeric';
+        }
+
+        return null;
+    };
+
+    getLastChild = function(element, cell) {
+        var child = element;
+
+        while (child.children && child.children.length > 0) {
+            child = child.children[cell];
+        }
+
+        return child;
+    };
+
     sorterPrototype = {
 
         getCell: function(row)
@@ -51,31 +96,75 @@ var tsorter = (function()
         sort: function( e )
         {   
             var that = this,
-                th = e.target;
+                th = e.target,
+                parent = th.parentNode.tagName,
+                sortType = th.getAttribute('data-tsorter') || getDataType(that.trs[1], th.cellIndex),
+                hasClassList = !!document.body.classList,
+                classes;
 
-            // TODO: make sure target 'th' is not a child element of a <th> 
-            //  We can't use currentTarget because of backwards browser support
-            //  IE6,7,8 don't have it.
+            if (parent.toLowerCase() === 'th') {
+                return;
+            }
 
             // set the data retrieval function for this column 
             that.column = th.cellIndex;
-            that.get = that.getAccessor( th.getAttribute('data-tsorter') );
+            that.get = that.getAccessor(sortType);
 
-            if( that.prevCol === that.column )
-            {
-                // if already sorted, reverse
-                th.className = th.className !== 'descend' ? 'descend' : 'ascend';
-                that.reverseTable();
-            }
-            else
-            {
-                // not sorted - call quicksort
-                th.className = 'descend';
-                if( that.prevCol !== -1 && that.ths[that.prevCol].className !== 'exc_cell'){
-                    that.ths[that.prevCol].className = '';
+            if (hasClassList) {
+                classes = th.classList;
+
+                if (classes.contains('descend')) {
+                    classes.add('ascend');
+                    classes.remove('descend');
+
+                    that.sortAscending = true;
                 }
-                that.quicksort(0, that.trs.length);
+                else if (classes.contains('ascend'))
+                {
+                    classes.remove('ascend');
+                    classes.add('descend');
+
+                    that.sortAscending = false;
+                }
+                else {
+                    classes.add('descend');
+
+                    that.sortAscending = false;
+                }
+
+                // Cleanup the previous column.
+                if (that.prevCol !== -1 && that.prevCol !== that.column)
+                {
+                    that.ths[that.prevCol].classList.remove('ascend');
+                    that.ths[that.prevCol].classList.remove('descend');
+                }
+            } else {
+                classes = th.className.split(' ');
+
+                if (classes.indexOf('descend') > -1) {
+                    th.className = th.className.replace('descend', 'ascend');
+
+                    that.sortAscending = true;
+                } else if (classes.indexOf('ascend') > -1) {
+                    th.className = th.className.replace('ascend', 'descend');
+
+                    that.sortAscending = false;
+                } else {
+                    th.className += ' descend';
+
+                    that.sortAscending = false;
+                }
+
+                // Cleanup the previous column.
+                if (that.prevCol !== -1 && that.prevCol !== that.column)
+                {
+                    that.ths[that.prevCol].className.replace('ascend', '');
+                    that.ths[that.prevCol].className.replace('descend', '');
+                }
             }
+
+            that.quicksort(0, that.trs.length);
+
             that.prevCol = that.column;
         },
         
@@ -104,7 +193,7 @@ var tsorter = (function()
                     };
                 case "numeric":
                     return function(row){  
-                        return parseFloat( that.getCell(row).firstChild.nodeValue.replace(/\D/g,''), 10 );
+                        return parseFloat( that.getCell(row).firstChild.nodeValue.replace(/\D/g,''));
                     };
                 default: /* Plain Text */
                     return function(row){  
@@ -138,20 +227,6 @@ var tsorter = (function()
                 }
             }
         },
-        
-        /* 
-         * REVERSE TABLE
-         * Reverses a table ordering
-         */
-        reverseTable: function()
-        {
-            var that = this,
-                i;
-
-            for( i = 1; i < that.trs.length; i++ ) {
-                that.tbody.insertBefore( that.trs[i], that.trs[0] );
-            }
-        },
 
         /*
          * QUICKSORT
@@ -164,33 +239,48 @@ var tsorter = (function()
                 that = this;
 
             if( hi <= lo+1 ){ return; }
-             
+
             if( (hi - lo) === 2 ) {
                 if(that.get(hi-1) > that.get(lo)) {
-                    that.exchange(hi-1, lo);   
+                    that.exchange(hi-1, lo);
                 }
                 return;
             }
-            
+
             i = lo + 1;
             j = hi - 1;
-            
+
             if( that.get(lo) > that.get( i) ){ that.exchange( i, lo); }
             if( that.get( j) > that.get(lo) ){ that.exchange(lo,  j); }
             if( that.get(lo) > that.get( i) ){ that.exchange( i, lo); }
-            
+
             pivot = that.get(lo);
-            
+
             while(true) {
-                j--;
-                while(pivot > that.get(j)){ j--; }
-                i++;
-                while(that.get(i) > pivot){ i++; }
+                if (that.sortAscending) {
+                    while (pivot > that.get(j)) { j--; }
+                    while (that.get(i) > pivot) { i++; }
+                } else {
+                    while (pivot < that.get(j)) { j--; }
+                    while (that.get(i) < pivot) { i++; }
+                }
+
                 if(j <= i){ break; }
-                that.exchange(i, j);
+
+                // JSLint is forcing '===', but that doesn't work with strings.
+                if (that.get(i) > that.get(j) || that.get(i) < that.get(j)) {
+                    that.exchange(i, j);
+                }
+
+                i++;
+                j--;
             }
-            that.exchange(lo, j);
-            
+
+            // JSLint is forcing '===', but that doesn't work with strings.
+            if (that.get(lo) > that.get(j) || that.get(lo) < that.get(j)) {
+                that.exchange(lo, j);
+            }
+
             if((j-lo) < (hi-j)) {
                 that.quicksort(lo, j);
                 that.quicksort(j+1, hi);
@@ -202,10 +292,17 @@ var tsorter = (function()
 
         init: function( table, initialSortedColumn, customDataAccessors ){
             var that = this,
-                i;
+                i,
+                sortType,
+                th;
 
             if( typeof table === 'string' ){
                 table = document.getElementById(table);
+            }
+
+            // Add the sortable calss.
+            if (table.className.indexOf('tsorterSortable') <= -1) {
+                table.className += ' tsorterSortable';
             }
 
             that.table = table;
@@ -218,6 +315,25 @@ var tsorter = (function()
 
             for( i = 0; i < that.ths.length; i++ ) {
                 addEvent( that.ths[i], 'click', that.boundSort );
+
+                // Make the cursor a pointer.
+                that.ths[i].style.cursor = 'pointer';
+            }
+
+            // Add the ascending arrow to the initially sorted column (if applicable).
+            if (initialSortedColumn !== undefined && that.ths.length >= initialSortedColumn) {
+                that.ths[initialSortedColumn].className += ' ascend';
+
+                th = that.ths[initialSortedColumn];
+                sortType = th.getAttribute('data-tsorter') || getDataType(that.trs[1], th.cellIndex);
+
+                // set the data retrieval function for this column
+                that.column = th.cellIndex;
+                that.get = that.getAccessor(sortType);
+
+                that.quicksort(1, that.ths.length);
+
+                that.prevCol = that.column;
             }
         },
 
