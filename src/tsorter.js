@@ -1,3 +1,8 @@
+/*!
+ * tsorter 2.0.0 - Copyright 2015 Terrill Dent, http://terrill.ca
+ * JavaScript HTML Table Sorter
+ * Released under MIT license, http://terrill.ca/sorting/tsorter/LICENSE
+ */
 var tsorter = (function()
 {
     'use strict';
@@ -107,8 +112,10 @@ var tsorter = (function()
             }
 
             // set the data retrieval function for this column 
-            that.column = th.cellIndex;
+            that.column = that.getHeaderIndex( that.table, th );
             that.get = that.getAccessor(sortType);
+            console.log("Sorting by column number " + that.column);
+
 
             if (hasClassList) {
                 classes = th.classList;
@@ -193,17 +200,16 @@ var tsorter = (function()
                     };
                 case "numeric":
                     return function(row){  
-                        return parseFloat( that.getCell(row).firstChild.nodeValue.replace(/\D/g,''));
+                        return parseFloat( that.getCell(row).firstChild.nodeValue );
                     };
                 default: /* Plain Text */
                     return function(row){  
-                        return that.getCell(row).firstChild.nodeValue.toLowerCase();
+                        return that.getCell(row).firstChild.nodeValue;
                     };
             }
         },
 
-        /* 
-         * Exchange
+        /* Exchange
          * A complicated way of exchanging two rows in a table.
          * Exchanges rows at index i and j
          */
@@ -290,6 +296,33 @@ var tsorter = (function()
             }
         },
 
+        getHeaderIndex: function( table, th ){
+            var ths = table.tHead.getElementsByTagName("th");
+            var index = 0;
+            for( var i = 0 ; i < ths.length ; i++ ){
+                var headerCell = ths[i];
+                if( headerCell.innerHTML === th.innerHTML ){
+                    return index;
+                }
+                index += headerCell.colSpan;
+            }
+        },
+
+        readHeaders: function( table ){
+            var ths = table.tHead.getElementsByTagName("th");
+            var headers = [];
+            var index = 0;
+            for( var i = 0; i < ths.length; i++ ){
+                var th = ths[i];
+                for( var j = 0; j<th.colSpan; j++ ){
+                    headers[index] = th;
+                    index++;
+                    console.log("Adding a header at index " + index + " for header " + th.innerHTML);
+                }
+            }
+            return headers;
+        },
+
         init: function( table, initialSortedColumn, customDataAccessors ){
             var that = this,
                 i,
@@ -306,7 +339,7 @@ var tsorter = (function()
             }
 
             that.table = table;
-            that.ths   = table.tHead.getElementsByTagName("th");
+            that.ths   = that.readHeaders(table);
             that.tbody = table.tBodies[0];
             that.trs   = that.tbody.getElementsByTagName("tr");
             that.prevCol = ( initialSortedColumn && initialSortedColumn > 0 ) ? initialSortedColumn : -1;
