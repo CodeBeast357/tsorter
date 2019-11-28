@@ -204,7 +204,10 @@ var tsorter = (function()
                     };
                 default: /* Plain Text */
                     return function(row){  
-                        return that.getCell(row).firstChild.nodeValue;
+                        if (typeof(that.getCell(row)) != "undefined" && that.getCell(row).firstChild != null)
+                            return that.getCell(row).firstChild.nodeValue;
+                        else
+                            return '';
                     };
             }
         },
@@ -331,6 +334,10 @@ var tsorter = (function()
 
             if( typeof table === 'string' ){
                 table = document.getElementById(table);
+            }
+
+            if( !table || table == null ){
+                return;
             }
 
             // Add the sortable calss.
