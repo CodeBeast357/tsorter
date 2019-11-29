@@ -67,7 +67,7 @@ var tsorter = (function()
     };
 
     isNumeric = function(text) {
-        if (/^\d+$/.test(text)) {
+        if (/^[+-]?(?:\d*\.)?\d+$/.test(text)) {
             return 'numeric';
         }
 
