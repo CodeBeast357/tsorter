@@ -196,10 +196,11 @@ var tsorter = (function () {
           };
         default: /* Plain Text */
           return function (row) {
-            if (typeof (that.getCell(row)) != "undefined" && that.getCell(row).firstChild != null)
+            if (typeof (that.getCell(row)) != "undefined" && that.getCell(row).firstChild != null) {
               return that.getCell(row).firstChild.nodeValue;
-            else
+            } else {
               return '';
+            }
           };
       }
     },
