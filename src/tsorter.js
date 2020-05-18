@@ -13,17 +13,15 @@ var tsorter = (function () {
     getDataType,
     isNumeric,
     getLastChild,
-    style,
-    downArrow = '▼',
-    upArrow = '▲';
+    style;
 
   // Add the styles.
   style = document.createElement('style');
   document.head.appendChild(style);
 
   style.sheet.insertRule('.tsorterSortable th { cursor: pointer }', 0);
-  style.sheet.insertRule('.tsorterSortable th.descend:after { content: " ' + upArrow + '" }', 0);
-  style.sheet.insertRule('.tsorterSortable th.ascend:after { content: " ' + downArrow + '" }', 0);
+  style.sheet.insertRule('.tsorterSortable th.descend:after { content: " \u25b2" }', 0);
+  style.sheet.insertRule('.tsorterSortable th.ascend:after { content: " \u25bc" }', 0);
 
   if (!Object.create) {
     // Define Missing Function
