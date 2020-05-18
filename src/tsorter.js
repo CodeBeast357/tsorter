@@ -21,6 +21,7 @@ var tsorter = (function () {
   style = document.createElement('style');
   document.head.appendChild(style);
 
+  style.sheet.insertRule('.tsorterSortable th { cursor: pointer }', 0);
   style.sheet.insertRule('.tsorterSortable th.descend:after { content: " ' + upArrow + '" }', 0);
   style.sheet.insertRule('.tsorterSortable th.ascend:after { content: " ' + downArrow + '" }', 0);
 
@@ -339,9 +340,6 @@ var tsorter = (function () {
 
       for (i = 0; i < that.ths.length; i++) {
         addEvent(that.ths[i], 'click', that.boundSort);
-
-        // Make the cursor a pointer.
-        that.ths[i].style.cursor = 'pointer';
       }
 
       // Add the ascending arrow to the initially sorted column (if applicable).
