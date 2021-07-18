@@ -28,14 +28,14 @@ describe("tsorter", function () {
     expect(browser).toHaveTitle('basic-table.html')
     test_table()
   })
-  it('works with filename nohead-table.html', function () {
-    browser.url(url.pathToFileURL('spec/nohead-table.html').href)
-    expect(browser).toHaveTitle('nohead-table.html')
+  it('works with filename no-head-table.html', function () {
+    browser.url(url.pathToFileURL('spec/no-head-table.html').href)
+    expect(browser).toHaveTitle('no-head-table.html')
     test_table()
   })
-  it('works with filename nobody-table.html', function () {
-    browser.url(url.pathToFileURL('spec/nobody-table.html').href)
-    expect(browser).toHaveTitle('nobody-table.html')
+  it('works with filename no-body-table.html', function () {
+    browser.url(url.pathToFileURL('spec/no-body-table.html').href)
+    expect(browser).toHaveTitle('no-body-table.html')
     test_table()
   })
 })

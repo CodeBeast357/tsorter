@@ -323,7 +323,7 @@ var tsorter = (function () {
         return;
       }
 
-      // Add the sortable calss.
+      // Add the sortable class.
       if (table.className.indexOf('tsorterSortable') <= -1) {
         table.className += ' tsorterSortable';
       }
