@@ -296,6 +296,9 @@ var tsorter = (function () {
 
     readHeaders: function (table) {
       var ths = table.tHead.getElementsByTagName("th");
+      if (!ths) {
+        ths = table.getElementsByTagName("tr")[0].getElementsByTagName("td");
+      }
       var headers = [];
       var index = 0;
       for (var i = 0; i < ths.length; i++) {

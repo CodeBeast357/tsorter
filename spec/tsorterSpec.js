@@ -3,6 +3,17 @@ const url = require('url')
 async function test_table() {
   const table = await $('#table')
   expect(await table.getAttribute('class')).toMatch(/\btsorterSortable\b/)
+  let header = await $('#table th:first-child')
+  if (header.error)
+    header = await $('#table td:first-child')
+  await header.click()
+  const rows = await $$('#table tr')
+  expect(await rows.every(async (element, index) => {
+    if (index < 1) return true
+    const cell = await element.$('td:first-child')
+    const value = parseInt(await cell.getText())
+    return value == index
+  })).toBeTrue()
 }
 
 describe("tsorter", () => {
